@@ -1,4 +1,4 @@
-import React, { createContext, useState, useReducer } from "react";
+import { createContext, ReactNode, useReducer, useState } from "react";
 import { ActionTypes, Cycle, cyclesReducer } from "../reducers/cycles";
 
 interface CreateCycleData {
@@ -14,19 +14,19 @@ interface CyclesContextType {
   markCurrentCycleAsFinished: () => void;
   setSecondsPassed: (seconds: number) => void;
   createNewCycle: (data: CreateCycleData) => void;
-  interruptCycle: () => void;
+  interruptCurrentCycle: () => void;
 }
 
 export const CyclesContext = createContext({} as CyclesContextType);
 
 interface CyclesContextProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function CyclesContextProvider({
   children,
 }: CyclesContextProviderProps) {
-  const [cyclesState, dispatch] = useReducer((cyclesReducer) => {}, {
+  const [cyclesState, dispatch] = useReducer(cyclesReducer, {
     cycles: [],
     activeCycleId: null,
   });
@@ -34,7 +34,6 @@ export function CyclesContextProvider({
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
 
   const { cycles, activeCycleId } = cyclesState;
-
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
 
   function setSecondsPassed(seconds: number) {
@@ -44,7 +43,9 @@ export function CyclesContextProvider({
   function markCurrentCycleAsFinished() {
     dispatch({
       type: ActionTypes.MARK_CURRENT_CYCLE_AS_FINISHED,
-      payload: { activeCycleId },
+      payload: {
+        activeCycleId,
+      },
     });
   }
 
@@ -60,16 +61,20 @@ export function CyclesContextProvider({
 
     dispatch({
       type: ActionTypes.ADD_NEW_CYCLE,
-      payload: { newCycle },
+      payload: {
+        newCycle,
+      },
     });
 
     setAmountSecondsPassed(0);
   }
 
-  function interruptCycle() {
+  function interruptCurrentCycle() {
     dispatch({
       type: ActionTypes.INTERRUPT_CURRENT_CYCLE,
-      payload: { activeCycleId },
+      payload: {
+        activeCycleId,
+      },
     });
   }
 
@@ -83,7 +88,7 @@ export function CyclesContextProvider({
         amountSecondsPassed,
         setSecondsPassed,
         createNewCycle,
-        interruptCycle,
+        interruptCurrentCycle,
       }}
     >
       {children}
